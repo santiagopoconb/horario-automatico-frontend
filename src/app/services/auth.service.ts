@@ -21,7 +21,7 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = 'https://horario-automatico-production.up.railway.app';
 
   constructor(
     private http: HttpClient,
