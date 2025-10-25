@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../AppAsignacionFrontend/src/environments/enviroment';
+import { environment } from '../../environments/enviroment';
 
 export interface Aula {
   salon: string;
