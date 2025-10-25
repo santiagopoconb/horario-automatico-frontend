@@ -1,0 +1,202 @@
+<div class="main-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-placeholder">UMG</div>
+      <h1>UMG de Colores</h1>
+    </div>
+    <div class="header-right">
+      <span class="user-name">{{ nombreUsuario }}</span>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav>
+        <a routerLink="/inicio" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        
+        <a routerLink="/estudiantes/inscripcion" class="nav-item active">
+          <span class="icon">👤</span>
+          <span>Agregar Estudiante</span>
+        </a>
+        
+        <a routerLink="/catedraticos" class="nav-item">
+          <span class="icon">👨‍🏫</span>
+          <span>Catedráticos</span>
+        </a>
+        
+        <a routerLink="/asignacion" class="nav-item">
+          <span class="icon">📋</span>
+          <span>Asignación</span>
+        </a>
+        <!--
+        <a routerLink="/cursos" class="nav-item">
+          <span class="icon">📚</span>
+          <span>Cursos</span>
+        </a>-->
+        
+        <a routerLink="/reportes" class="nav-item">
+          <span class="icon">📊</span>
+          <span>Reportes</span>
+        </a>
+        
+        <a (click)="cerrarSesion()" class="nav-item">
+          <span class="icon">🚪</span>
+          <span>Cerrar Sesión</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="form-container">
+        <h2 class="form-title">Inscripción</h2>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button 
+            class="tab-button" 
+            [class.active]="modoInscripcion === 'masivo'"
+            (click)="modoInscripcion = 'masivo'">
+            Inscripción Masiva
+          </button>
+          <button 
+            class="tab-button" 
+            [class.active]="modoInscripcion === 'individual'"
+            (click)="modoInscripcion = 'individual'">
+            Inscripción Individual
+          </button>
+        </div>
+
+        <!-- Formulario Individual -->
+        <div *ngIf="modoInscripcion === 'individual'" class="tab-content">
+          <form [formGroup]="formularioEstudiante" (ngSubmit)="guardarEstudiante()">
+            
+            <div class="form-group">
+              <label for="cui">CUI:</label>
+              <input 
+                type="text" 
+                id="cui" 
+                formControlName="cuiAlumno"
+                maxlength="13"
+                placeholder="Ingrese 13 dígitos">
+              <span class="error" *ngIf="formularioEstudiante.get('cuiAlumno')?.invalid && formularioEstudiante.get('cuiAlumno')?.touched">
+                CUI inválido (13 dígitos requeridos)
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="nombre">Nombre:</label>
+              <input 
+                type="text" 
+                id="nombre" 
+                formControlName="nombreAlumno"
+                placeholder="Nombre del estudiante">
+              <span class="error" *ngIf="formularioEstudiante.get('nombreAlumno')?.invalid && formularioEstudiante.get('nombreAlumno')?.touched">
+                El nombre es requerido
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="apellidos">Apellidos:</label>
+              <input 
+                type="text" 
+                id="apellidos" 
+                formControlName="apellidosAlumno"
+                placeholder="Apellidos del estudiante">
+              <span class="error" *ngIf="formularioEstudiante.get('apellidosAlumno')?.invalid && formularioEstudiante.get('apellidosAlumno')?.touched">
+                Los apellidos son requeridos
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="genero">Genero:</label>
+              <select id="genero" formControlName="genero">
+                <option value="">Seleccione...</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+              <span class="error" *ngIf="formularioEstudiante.get('genero')?.invalid && formularioEstudiante.get('genero')?.touched">
+                Seleccione un género
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+              <input 
+                type="date" 
+                id="fechaNacimiento" 
+                formControlName="fechaNacimiento">
+              <span class="error" *ngIf="formularioEstudiante.get('fechaNacimiento')?.invalid && formularioEstudiante.get('fechaNacimiento')?.touched">
+                La fecha de nacimiento es requerida
+              </span>
+            </div>
+
+            <div class="button-group">
+              <button 
+                type="submit" 
+                class="btn-primary"
+                [disabled]="formularioEstudiante.invalid || guardando">
+                {{ guardando ? 'Guardando...' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Carga Masiva -->
+        <div *ngIf="modoInscripcion === 'masivo'" class="tab-content">
+          <div class="upload-section">
+            <div class="info-box">
+              <h3>Instrucciones para carga masiva:</h3>
+              <p>El archivo Excel debe contener las siguientes columnas:</p>
+              <ul>
+                <li><strong>CUI:</strong> 13 dígitos</li>
+                <li><strong>Nombre:</strong> Nombre del estudiante</li>
+                <li><strong>Apellidos:</strong> Apellidos del estudiante</li>
+                <li><strong>Genero:</strong> M o F </li>
+                <li><strong>Fecha Nacimiento:</strong> Formato DD-MM-YYYY </li>
+              </ul>
+            </div>
+
+            <div class="file-upload">
+              <input 
+                type="file" 
+                #fileInput 
+                (change)="cargarArchivo($event)" 
+                accept=".xlsx,.xls"
+                style="display: none;">
+              
+              <button type="button" class="btn-upload" (click)="fileInput.click()">
+                📁 Seleccionar Archivo Excel
+              </button>
+
+              <div *ngIf="nombreArchivo" class="file-info">
+                <span>📄 {{ nombreArchivo }}</span>
+                <button type="button" class="btn-clear" (click)="limpiarArchivo()">❌</button>
+              </div>
+            </div>
+
+            <div *ngIf="archivoSeleccionado" class="button-group">
+              <button 
+                type="button" 
+                class="btn-primary"
+                (click)="guardarMasivo()"
+                [disabled]="guardando">
+                {{ guardando ? 'Procesando...' : 'Inscribir Todos' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensajes de notificación -->
+        <div *ngIf="mensaje" class="notification" [class.success]="mensaje.tipo === 'success'" [class.error]="mensaje.tipo === 'error'">
+          {{ mensaje.texto }}
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="main-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-placeholder">UMG</div>
+      <h1>UMG de Colores</h1>
+    </div>
+    <div class="header-right">
+      <span class="user-name">{{ nombreUsuario }}</span>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav>
+        <a (click)="irInicio()" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        
+        
+        <a class="nav-item" (click)="navegarAgregarCatedratico()">
+          <span class="icon">👨‍🏫</span>
+          <span>Catedráticos</span>
+        </a>
+        
+        <a (click)="navegarAsignacion()" class="nav-item">
+          <span class="icon">📋</span>
+          <span>Asignación</span>
+        </a>
+        
+        <a class="nav-item active" (click)="navegarAulas()" *ngIf="rolUsuario == 3">
+          <span class="icon">📓</span>
+          <span>Aulas</span>
+        </a>
+        
+        <a (click)="navegarReportes()" class="nav-item">
+          <span class="icon">📊</span>
+          <span>Reportes</span>
+        </a>
+        
+        <a class="nav-item" (click)="cerrarSesion()">
+          <span class="icon">🚪</span>
+          <span>Cerrar Sesión</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="form-container">
+        <div class="title-row">
+          <h2 class="form-title">Aulas</h2>
+          <button class="btn-add" (click)="abrirFormulario()" *ngIf="rolUsuario == 3 && !mostrarFormulario">+</button>
+        </div>
+
+        <!-- Tabla de Aulas -->
+        <div *ngIf="!mostrarFormulario">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Salón</th>
+                  <th>Capacidad</th>
+                  <th>Sección</th>
+                  <th *ngIf="rolUsuario == 3">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let aula of aulas; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ aula.salon }}</td>
+                  <td>{{ aula.capacidad }}</td>
+                  <td>{{ aula.seccion || '-' }}</td>
+                  <td *ngIf="rolUsuario == 3" class="text-center">
+                    <button class="btn-delete" (click)="eliminarAula(aula.salon)">−</button>
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div *ngIf="aulas.length === 0" class="empty-state">
+              <p>No hay aulas registradas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div *ngIf="mostrarFormulario">
+          <form [formGroup]="aulaForm" (ngSubmit)="guardarAula()">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="salon">Salón<span class="required">*</span></label>
+                <input 
+                  type="text"
+                  id="salon"
+                  formControlName="salon"
+                  placeholder="Ej: 3N-01"
+                  class="form-input">
+                <span class="error-message" *ngIf="aulaForm.get('salon')?.invalid && aulaForm.get('salon')?.touched">
+                  El nombre del salón es obligatorio
+                </span>
+              </div>
+
+              <div class="form-group">
+                <label for="capacidad">Capacidad<span class="required">*</span></label>
+                <input 
+                  type="number"
+                  id="capacidad"
+                  formControlName="capacidad"
+                  placeholder="Ej: 25"
+                  class="form-input">
+                <span class="error-message" *ngIf="aulaForm.get('capacidad')?.invalid && aulaForm.get('capacidad')?.touched">
+                  La capacidad es obligatoria (máximo 25)
+                </span>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="button" class="btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
+              <button type="submit" class="btn-primary" [disabled]="aulaForm.invalid">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

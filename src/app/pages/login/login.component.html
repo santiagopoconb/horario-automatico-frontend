@@ -1,0 +1,75 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="logo-container">
+      <div class="logo-circle">
+        <img src="assets/images/logo-umg.png" alt="Logo UMG" class="logo" *ngIf="false">
+        <div class="logo-placeholder">UMG</div>
+      </div>
+    </div>
+
+    <!-- Título -->
+    <h1 class="login-title">UMG de Colores</h1>
+
+    <!-- Formulario -->
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      
+      <!-- Campo Usuario -->
+      <div class="form-group">
+        <label for="usuario" class="form-label">Usuario:</label>
+        <input
+          type="text"
+          id="usuario"
+          name="usuario"
+          [(ngModel)]="usuario"
+          placeholder="usuario"
+          class="form-input"
+          [disabled]="cargando"
+          autocomplete="username"
+        >
+      </div>
+
+      <!-- Campo Contraseña -->
+      <div class="form-group">
+        <label for="password" class="form-label">Contraseña:</label>
+        <div class="password-wrapper">
+          <input
+            [type]="mostrarPassword ? 'text' : 'password'"
+            id="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="****************"
+            class="form-input"
+            [disabled]="cargando"
+            autocomplete="current-password"
+          >
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [disabled]="cargando"
+            tabindex="-1"
+          >
+            <span *ngIf="!mostrarPassword"></span>
+            <span *ngIf="mostrarPassword"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mensaje de Error -->
+      <div *ngIf="errorMensaje" class="error-message">
+        {{ errorMensaje }}
+      </div>
+
+      <!-- Botón Ingresar -->
+      <button
+        type="submit"
+        class="btn-ingresar"
+        [disabled]="cargando"
+      >
+        <span *ngIf="!cargando">Ingresar</span>
+        <span *ngIf="cargando">Ingresando...</span>
+      </button>
+    </form>
+  </div>
+</div>

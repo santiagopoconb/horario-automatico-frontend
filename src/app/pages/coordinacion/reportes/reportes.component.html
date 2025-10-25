@@ -1,0 +1,239 @@
+<div class="main-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-placeholder">UMG</div>
+      <h1>UMG de Colores</h1>
+    </div>
+    <div class="header-right">
+      <span class="user-name">{{ nombreUsuario }}</span>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav>
+        <a class="nav-item" (click)="navegarInicio()">
+          <span class="icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarAgregarEstudiante()" *ngIf="rolUsuario == 1">
+          <span class="icon">👤</span>
+          <span>Agregar Estudiante</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarAgregarCatedratico()">
+          <span class="icon">👨‍🏫</span>
+          <span>Catedráticos</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarAsignacion()">
+          <span class="icon">📋</span>
+          <span>Asignación</span>
+        </a>
+        <a class="nav-item" (click)="navegarAulas()" *ngIf="rolUsuario == 3">
+          <span class="icon">📓</span>
+          <span>Aulas</span>
+        </a>
+        
+        <a class="nav-item active" (click)="navegarReportes()">
+          <span class="icon">📊</span>
+          <span>Reportes</span>
+        </a>
+        
+        <a class="nav-item" (click)="cerrarSesion()">
+          <span class="icon">🚪</span>
+          <span>Cerrar Sesión</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="reportes-container">
+        
+        <!-- MENÚ DE SELECCIÓN DE REPORTES -->
+        <div *ngIf="vistaSeleccionada === 'menu'" class="menu-reportes">
+          <h2 class="page-title">Reportes Disponibles</h2>
+          
+          <div class="reportes-grid">
+            <div class="reporte-card" (click)="seleccionarReporte('alumnos')">
+              <div class="card-icon">📋</div>
+              <h3>Reporte de Alumnos</h3>
+              <p>Listado completo de alumnos inscritos con su estado y fecha de inscripción</p>
+            </div>
+
+            <div class="reporte-card" (click)="seleccionarReporte('salones')">
+              <div class="card-icon">🏫</div>
+              <h3>Alumnos por Salón</h3>
+              <p>Distribución de alumnos organizados por salón de clases</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTE DE ALUMNOS -->
+        <div *ngIf="vistaSeleccionada === 'alumnos'" class="reporte-detalle">
+          <div class="reporte-header">
+            <button class="btn-volver" (click)="volverAlMenu()">
+              ← Volver
+            </button>
+            <h2 class="page-title">Reporte de Alumnos</h2>
+            <div class="botones-descarga">
+              <button class="btn-descargar btn-excel" (click)="descargarExcelAlumnos()">
+                📊 Descargar Excel
+              </button>
+              <button class="btn-descargar btn-pdf" (click)="descargarPdfAlumnos()">
+                📄 Descargar PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="cargando" class="loading">
+            <p>Cargando reporte...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="error" class="error-message">
+            <p>{{ error }}</p>
+          </div>
+
+          <!-- Tabla de Alumnos -->
+          <div *ngIf="!cargando && !error && alumnosReporte.length > 0" class="tabla-container">
+            <table class="tabla-reporte">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Carné</th>
+                  <th>Nombre Completo</th>
+                  <th>Estado</th>
+                  <th>Fecha Inscripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let alumno of alumnosReporte; let i = index">
+                  <td>{{ obtenerCorrelativo(i) }}</td>
+                  <td>{{ alumno.carne }}</td>
+                  <td>{{ alumno.nombreCompleto }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{'badge-asignado': alumno.estado === 'Asignado'}">
+                      {{ alumno.estado }}
+                    </span>
+                  </td>
+                  <td>{{ formatearFecha(alumno.fechaInscripcion) }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Paginación -->
+            <div class="paginacion">
+              <button 
+                class="btn-paginacion" 
+                [disabled]="paginaActualAlumnos === 0"
+                (click)="anteriorPaginaAlumnos()">
+                ← Anterior
+              </button>
+              
+              <span class="info-paginacion">
+                Página {{ paginaActualAlumnos + 1 }} de {{ totalPaginasAlumnos }} 
+                ({{ totalElementosAlumnos }} registros)
+              </span>
+              
+              <button 
+                class="btn-paginacion" 
+                [disabled]="paginaActualAlumnos >= totalPaginasAlumnos - 1"
+                (click)="siguientePaginaAlumnos()">
+                Siguiente →
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="!cargando && !error && alumnosReporte.length === 0" class="sin-datos">
+            <p>No hay datos disponibles</p>
+          </div>
+        </div>
+
+        <!-- REPORTE DE ALUMNOS POR SALÓN -->
+        <div *ngIf="vistaSeleccionada === 'salones'" class="reporte-detalle">
+          <div class="reporte-header">
+            <button class="btn-volver" (click)="volverAlMenu()">
+              ← Volver
+            </button>
+            <h2 class="page-title">Reporte de Alumnos por Salón</h2>
+            <div class="botones-descarga">
+              <button class="btn-descargar btn-excel" (click)="descargarExcelSalones()">
+                📊 Descargar Excel
+              </button>
+              <button class="btn-descargar btn-pdf" (click)="descargarPdfSalones()">
+                📄 Descargar PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="cargando" class="loading">
+            <p>Cargando reporte...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="error" class="error-message">
+            <p>{{ error }}</p>
+          </div>
+
+          <!-- Tablas por Salón -->
+          <div *ngIf="!cargando && !error && salonesReporte.length > 0" class="salones-container">
+            <div *ngFor="let salon of salonesReporte; let salonIndex = index" class="salon-seccion">
+              <h3 class="salon-titulo">{{ salon.nombreSalon }}</h3>
+              
+              <table class="tabla-reporte">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Carné</th>
+                    <th>Nombre Completo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let alumno of salon.alumnos; let alumnoIndex = index">
+                    <td>{{ alumnoIndex + 1 }}</td>
+                    <td>{{ alumno.carne }}</td>
+                    <td>{{ alumno.nombreCompleto }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="paginacion">
+              <button 
+                class="btn-paginacion" 
+                [disabled]="paginaActualSalones === 0"
+                (click)="anteriorPaginaSalones()">
+                ← Anterior
+              </button>
+              
+              <span class="info-paginacion">
+                Página {{ paginaActualSalones + 1 }} de {{ totalPaginasSalones }}
+                ({{ totalElementosSalones }} salones)
+              </span>
+              
+              <button 
+                class="btn-paginacion" 
+                [disabled]="paginaActualSalones >= totalPaginasSalones - 1"
+                (click)="siguientePaginaSalones()">
+                Siguiente →
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="!cargando && !error && salonesReporte.length === 0" class="sin-datos">
+            <p>No hay datos disponibles</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>

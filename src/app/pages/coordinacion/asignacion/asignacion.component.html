@@ -1,0 +1,122 @@
+<div class="main-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-placeholder">UMG</div>
+      <h1>UMG de Colores</h1>
+    </div>
+    <div class="header-right">
+      <span class="user-name">{{ nombreUsuario }}</span>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav>
+        <a (click)="irInicio()" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        
+        <a (click)="irAgregarEstudiante()" class="nav-item" *ngIf="rolUsuario == 1">
+          <span class="icon">👤</span>
+          <span>Agregar Estudiante</span>
+        </a>
+        
+        <a (click)="irCatedraticos()" class="nav-item">
+          <span class="icon">👨‍🏫</span>
+          <span>Catedráticos</span>
+        </a>
+        
+        <a class="nav-item active">
+          <span class="icon">📋</span>
+          <span>Asignación</span>
+        </a>
+        <a class="nav-item" (click)="navegarAulas()" *ngIf="rolUsuario == 3">
+          <span class="icon">📓</span>
+          <span>Aulas</span>
+        </a>
+        
+        <a (click)="irReportes()" class="nav-item">
+          <span class="icon">📊</span>
+          <span>Reportes</span>
+        </a>
+        
+        <a (click)="cerrarSesion()" class="nav-item">
+          <span class="icon">🚪</span>
+          <span>Cerrar Sesión</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="form-container">
+        <!-- Título con botón -->
+        <div class="title-row">
+          <h2 class="form-title">Asignación de cursos</h2>
+          
+          <div class="button-group-inline">
+            <button 
+              class="btn-secondary" 
+              (click)="reiniciarHorarios()"
+              [disabled]="cargando">
+              Reiniciar Horario
+            </button>
+
+            <button 
+              class="btn-generar" 
+              (click)="generarHorarios()"
+              [disabled]="cargando">
+              {{ cargando ? 'Generando...' : 'Generar Horarios' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="mensajeError" class="mensaje-error">
+          {{ mensajeError }}
+        </div>
+
+        <!-- Loader -->
+        <div *ngIf="cargando" class="loader-container">
+          <div class="loader"></div>
+          <p>Cargando asignaciones...</p>
+        </div>
+
+        <!-- Mensaje sin asignaciones -->
+        <div *ngIf="!hayAsignaciones && !cargando" class="sin-asignaciones">
+          <p>Sin asignaciones</p>
+        </div>
+
+        <!-- Tabla de horarios -->
+        <div *ngIf="hayAsignaciones && !cargando" class="table-wrapper">
+          <table class="horarios-table">
+            <thead>
+              <tr>
+                <th class="hora-column"></th>
+                <th *ngFor="let salon of salones">{{ salon }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let horario of horarios">
+                <td class="hora-column">{{ horario.hora }}</td>
+                <td *ngFor="let salon of salones" class="celda-asignacion">
+                  <div *ngIf="obtenerAsignacion(horario.hora, salon); let asignacion" class="asignacion-detalle">
+                    <div class="curso">{{ asignacion.curso }}</div>
+                    <div class="seccion">{{ asignacion.seccion }}</div>
+                    <div class="profesor">{{ asignacion.profesor }}</div>
+                  </div>
+                  <div *ngIf="!obtenerAsignacion(horario.hora, salon)" class="sin-datos">
+                    -
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

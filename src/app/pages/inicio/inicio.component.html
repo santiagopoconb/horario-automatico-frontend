@@ -1,0 +1,214 @@
+<div class="main-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-placeholder">UMG</div>
+      <h1>UMG de Colores</h1>
+    </div>
+    <div class="header-right">
+      <span class="user-name">{{ nombreUsuario }}</span>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav>
+        <a routerLink="/inicio" class="nav-item active">
+          <span class="icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarAgregarEstudiante()" *ngIf="rolUsuario == 1">
+          <span class="icon">👤</span>
+          <span>Agregar Estudiante</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarAgregarCatedratico()">
+          <span class="icon">👨‍🏫</span>
+          <span>Catedráticos</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarAsignacion()">
+          <span class="icon">📋</span>
+          <span>Asignación</span>
+        </a>
+        <a class="nav-item" (click)="navegarAulas()" *ngIf="rolUsuario == 3">
+          <span class="icon">📓</span>
+          <span>Aulas</span>
+        </a>
+        
+        <a class="nav-item" (click)="navegarReportes()">
+          <span class="icon">📊</span>
+          <span>Reportes</span>
+        </a>
+        
+        <a class="nav-item" (click)="cerrarSesion()">
+          <span class="icon">🚪</span>
+          <span>Cerrar Sesión</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="dashboard-container">
+        <h2 class="dashboard-title">Ciclo Académico 2025</h2>
+
+        <!-- Loading -->
+        <div *ngIf="cargando" class="loading">
+          <p>Cargando estadísticas...</p>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="error" class="error-message">
+          <p>{{ error }}</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div *ngIf="!cargando && !error && estadisticas" class="stats-grid">
+          
+          <!-- Card Alumnos -->
+          <div class="stat-card alumnos-card">
+            <div class="card-header">
+              <span class="card-icon">👥</span>
+              <h3>Alumnos</h3>
+            </div>
+            <div class="card-body">
+              <div class="stat-row">
+                <span class="stat-label">Total Inscritos:</span>
+                <span class="stat-value">{{ estadisticas.alumnos.totalInscritos }}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Total Asignados:</span>
+                <span class="stat-value">{{ estadisticas.alumnos.totalAsignados }}</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-row">
+                <span class="stat-label">Hombres:</span>
+                <span class="stat-value">{{ estadisticas.alumnos.porGenero.hombres }}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Mujeres:</span>
+                <span class="stat-value">{{ estadisticas.alumnos.porGenero.mujeres }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Profesores -->
+          <div class="stat-card profesores-card">
+            <div class="card-header">
+              <span class="card-icon">👨‍🏫</span>
+              <h3>Profesores</h3>
+            </div>
+            <div class="card-body">
+              <div class="stat-row">
+                <span class="stat-label">Total:</span>
+                <span class="stat-value">{{ estadisticas.profesores.total }}</span>
+              </div>
+              <div class="stat-divider"></div>
+              <h4 class="subtitle">Por Profesión:</h4>
+              <div class="stat-row" *ngFor="let prof of estadisticas.profesores.porProfesion">
+                <span class="stat-label">{{ prof.profesion }}:</span>
+                <span class="stat-value">{{ prof.cantidad }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Aulas -->
+          <div class="stat-card aulas-card">
+            <div class="card-header">
+              <span class="card-icon">🏫</span>
+              <h3>Aulas</h3>
+            </div>
+            <div class="card-body">
+              <div class="stat-row">
+                <span class="stat-label">Total Disponible:</span>
+                <span class="stat-value">{{ estadisticas.aulas.totalDisponible }}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Capacidad Total:</span>
+                <span class="stat-value">{{ estadisticas.aulas.capacidadTotal }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sección de Aulas - FUERA del ngIf de estadisticas -->
+        <div *ngIf="!cargando && !error" class="aulas-section">
+          <h3 class="section-title">Asignaciones por Aula</h3>
+          
+          <!-- Sin asignaciones -->
+          <div *ngIf="!tieneAsignaciones()" class="sin-asignaciones">
+            <p>Sin asignaciones</p>
+          </div>
+
+          <!-- Grid de Aulas -->
+          <div *ngIf="tieneAsignaciones()" class="aulas-grid">
+            <div *ngFor="let aula of estadisticasAulas" class="aula-card">
+              <div class="aula-header">
+                <h4>{{ aula.nombreAula }}</h4>
+                <span class="aula-ocupacion">{{ aula.totalAlumnos }}/{{ aula.capacidad }}</span>
+              </div>
+              
+              <div class="aula-body">
+                <div class="aula-stats">
+                  <div class="aula-stat-item">
+                    <span class="label">Capacidad:</span>
+                    <span class="value">{{ aula.capacidad }}</span>
+                  </div>
+                  <div class="aula-stat-item">
+                    <span class="label">Total Alumnos:</span>
+                    <span class="value">{{ aula.totalAlumnos }}</span>
+                  </div>
+                </div>
+
+                <!-- Gráfico de Pie -->
+                <div class="pie-chart-container">
+                  <svg viewBox="0 0 100 100" class="pie-chart">
+                    <!-- Hombres -->
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="transparent"
+                      stroke="#2196f3"
+                      [attr.stroke-dasharray]="calcularPorcentaje(aula.totalHombres, aula.totalAlumnos) * 2.513 + ' 251.3'"
+                      stroke-width="20"
+                      transform="rotate(-90 50 50)"
+                    />
+                    <!-- Mujeres -->
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="transparent"
+                      stroke="#e91e63"
+                      [attr.stroke-dasharray]="calcularPorcentaje(aula.totalMujeres, aula.totalAlumnos) * 2.513 + ' 251.3'"
+                      [attr.stroke-dashoffset]="-calcularPorcentaje(aula.totalHombres, aula.totalAlumnos) * 2.513"
+                      stroke-width="20"
+                      transform="rotate(-90 50 50)"
+                    />
+                  </svg>
+                  
+                  <div class="pie-legend">
+                    <div class="legend-item">
+                      <span class="legend-color hombres"></span>
+                      <span class="legend-text">Hombres: {{ aula.totalHombres }}</span>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-color mujeres"></span>
+                      <span class="legend-text">Mujeres: {{ aula.totalMujeres }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
