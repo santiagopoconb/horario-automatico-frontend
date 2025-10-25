@@ -33,7 +33,7 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials, { headers })
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials, { headers, withCredentials: true })
       .pipe(
         tap(response => {
           sessionStorage.setItem('token', response.jwtToken);
